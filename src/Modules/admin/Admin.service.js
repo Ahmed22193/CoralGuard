@@ -70,13 +70,14 @@ export const getStats = async (req, res, next) => {
 
   SUCCESS(res, 200, "Statistics fetched successfully", {
     users: {
+      totalUsers: doctorsCount + patientsCount,
       doctors: doctorsCount,
       patients: patientsCount,
       acceptedDoctors: acceptedDoctorsCount,
       unacceptedDoctors: unacceptedDoctorsCount,
     },
     consultations: {
-      total: totalConsultations,
+      totalConsultations: totalConsultations,
       PENDING: consultationsWaiting,
       COMPLETED: consultationsDone,
       PAID: consultationsPaid,
