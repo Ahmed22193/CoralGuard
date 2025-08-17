@@ -1,16 +1,30 @@
 import { Router } from "express";
-import isAdmin from '../../Middlewares/isAdmin.js';
-import verifyToken from '../../Middlewares/VerifyingToken.js';
-import * as adminService from './Admin.service.js';
+import isAdmin from "../../Middlewares/isAdmin.js";
+import verifyToken from "../../Middlewares/VerifyingToken.js";
+import * as adminService from "./Admin.service.js";
 const router = Router();
 
-router.patch('/AcceptDoctor',verifyToken,isAdmin,adminService.AcceptDoctor);
-router.get('/doctorsRegistration',verifyToken,isAdmin,adminService.doctorsRegistration);
-router.delete('/deleteUser',verifyToken,isAdmin,adminService.deleteUser);
-router.delete('/deleteConsultation',verifyToken,isAdmin,adminService.deleteConsultation);
-router.get('/getStats',verifyToken,isAdmin,adminService.getStats);
-router.get('/getAllDoctors',verifyToken,isAdmin,adminService.getAllDoctors);
-router.get('/getAllPatients',verifyToken,isAdmin,adminService.getAllPatients);
-router.get('/getAllConsultations',verifyToken,isAdmin,adminService.getAllConsultations);
+router.patch("/AcceptDoctor", verifyToken, isAdmin, adminService.AcceptDoctor);
+router.get(
+  "/doctorsRegistration",
+  verifyToken,
+  isAdmin,
+  adminService.doctorsRegistration
+);
+router.delete("/deleteUser", verifyToken, isAdmin, adminService.deleteUser);
+router.delete(
+  "/deleteConsultation",
+  verifyToken,
+  isAdmin,
+  adminService.deleteConsultation
+);
+router.get("/getStats", verifyToken, isAdmin, adminService.getStats);
+router.get("/getAllUsers", verifyToken, isAdmin, adminService.getAllUsers);
+router.get(
+  "/getAllConsultations",
+  verifyToken,
+  isAdmin,
+  adminService.getAllConsultations
+);
 
-export default router;  
+export default router;

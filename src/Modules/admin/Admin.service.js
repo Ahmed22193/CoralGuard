@@ -87,17 +87,11 @@ export const getStats = async (req, res, next) => {
   });
 };
 
-export const getAllDoctors = async (req, res, next) => {
-  const doctors = await UserModel.find({ userType: "DOCTOR" });
-  if (!doctors || doctors.length === 0)
-    return next(new Error("No Doctors Found", { cause: 404 }));
-  SUCCESS(res, 200, "All Doctors", doctors);
-};
-export const getAllPatients = async (req, res, next) => {
-  const patients = await UserModel.find({ userType: "PATIENT" });
-  if (!patients || patients.length === 0)
-    return next(new Error("No Patients Found", { cause: 404 }));
-  SUCCESS(res, 200, "All Patients", patients);
+export const getAllUsers = async (req, res, next) => {
+  const users = await UserModel.find();
+  if (!users || users.length === 0)
+    return next(new Error("No Users Found", { cause: 404 }));
+  SUCCESS(res, 200, "All Users", users);
 };
 
 export const getAllConsultations = async (req, res, next) => {
