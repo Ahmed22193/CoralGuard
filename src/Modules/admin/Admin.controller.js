@@ -4,7 +4,7 @@ import verifyToken from "../../Middlewares/VerifyingToken.js";
 import * as adminService from "./Admin.service.js";
 const router = Router();
 
-router.patch("/AcceptDoctor", verifyToken, isAdmin, adminService.AcceptDoctor);
+router.patch("/UpdateDoctor", verifyToken, isAdmin, adminService.UpdateDoctor);
 router.get(
   "/doctorsRegistration",
   verifyToken,

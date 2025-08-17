@@ -2,18 +2,20 @@ import UserModel from "../../DB/Models/users.model.js";
 import SUCCESS from "../../Utils/SuccessfulRes.js";
 import ConsultationModel from "../../DB/Models/Consultation.model.js";
 
-export const AcceptDoctor = async (req, res, next) => {
-  const { doctorId } = req.body;
+export const UpdateDoctor = async (req, res, next) => {
+  const { doctorId, acceptTerms } = req.body;
   const doctor = await UserModel.findOneAndUpdate(
-    { _id: doctorId, userType: "DOCTOR", acceptTerms: false },
-    { acceptTerms: true },
+    { _id: doctorId, userType: "DOCTOR" },
+    { acceptTerms: Boolean(acceptTerms) },
     { new: true }
   );
-  if (!doctor)
-    return next(
-      new Error("Doctor Not Found or he is accepted already", { cause: 404 })
-    );
-  SUCCESS(res, 200, "Doctor Accepted", doctor);
+  if (!doctor) return next(new Error("Doctor Not Found", { cause: 404 }));
+  SUCCESS(
+    res,
+    200,
+    `Doctor updated to : ${acceptTerms ? `accepted` : `rejected`}`,
+    doctor
+  );
 };
 export const doctorsRegistration = async (req, res, next) => {
   const doctors = await UserModel.find({
