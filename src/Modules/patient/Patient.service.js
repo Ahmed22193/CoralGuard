@@ -18,9 +18,13 @@ export const createConsultation = async (req, res, next) => {
     const attachments = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
+        const resourceType = file.mimetype.startsWith("image")
+          ? "image"
+          : "raw";
+
         const uploadedFile = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "consultations_files" }, // فولدر في Cloudinary
+            { folder: "consultations_files", resource_type: resourceType },
             (error, result) => {
               if (error) return reject(error);
               resolve(result);
@@ -32,6 +36,7 @@ export const createConsultation = async (req, res, next) => {
         attachments.push({
           fileName: file.originalname,
           fileUrl: uploadedFile.secure_url,
+          fileType: file.mimetype,
         });
       }
     }
@@ -74,7 +79,7 @@ export const getMyConsultations = async (req, res, next) => {
     "firstName middleName lastName address specialest"
   );
   if (!consultations || consultations.length === 0) {
-    return next(new Error("لا توجد استشارات", { cause: 404 })); 
+    return next(new Error("لا توجد استشارات", { cause: 404 }));
   }
 
   SUCCESS(res, 200, "استشاراتك", consultations);
