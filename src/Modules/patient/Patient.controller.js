@@ -9,5 +9,7 @@ router.post("/createConsultation",verifyToken,upload.array("files", 5),PatServic
 router.get("/MyConsultations", verifyToken, PatService.getMyConsultations);
 router.patch("/PAID", verifyToken , PatService.PAID);
 router.delete("/deleteConsultation", verifyToken, PatService.deleteConsultation);
+router.delete("/deleteConsultation", verifyToken, PatService.deleteConsultation);
+router.patch("/updateConsultation", verifyToken, upload.array("files", 5), PatService.updateConsultation);
 
 export default router;

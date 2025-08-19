@@ -120,3 +120,67 @@ export const deleteConsultation = async (req, res, next) => {
 
   SUCCESS(res, 200, "Consultation Deleted Successfully", consultation);
 };
+
+export const updateConsultation = async (req, res, next) => {
+  const { consultationId, description, type } = req.body;
+  const userId = req.user._id;
+
+  try {
+    // 1) التحقق من وجود الاستشارة وملكيتها
+    const consultation = await Consultation.findOne({
+      _id: consultationId,
+      patient: userId,
+    });
+    if (!consultation)
+      return next(new Error("Consultation Not Found", { cause: 404 }));
+
+    // 2) مسح الملفات القديمة من Cloudinary لو فيه ملفات
+    if (consultation.attachments && consultation.attachments.length > 0) {
+      for (const file of consultation.attachments) {
+        // public_id بيكون جوه secure_url بعد /upload/
+        const publicId = file.fileUrl.split("/upload/")[1].split(".")[0];
+        await cloudinary.uploader.destroy(`consultations_files/${publicId}`, {
+          resource_type: "auto",
+        });
+      }
+    }
+
+    // 3) رفع الملفات الجديدة لو موجودة
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const resourceType = file.mimetype.startsWith("image")
+          ? "image"
+          : "raw";
+
+        const uploadedFile = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "consultations_files", resource_type: resourceType },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
+
+        attachments.push({
+          fileName: file.originalname,
+          fileUrl: uploadedFile.secure_url,
+          fileType: file.mimetype,
+        });
+      }
+    }
+
+    // 4) تحديث بيانات الاستشارة
+    consultation.description = description || consultation.description;
+    consultation.type = type || consultation.type;
+    if (attachments.length > 0) consultation.attachments = attachments;
+
+    await consultation.save();
+
+    SUCCESS(res, 200, "Consultation Updated Successfully", consultation);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
