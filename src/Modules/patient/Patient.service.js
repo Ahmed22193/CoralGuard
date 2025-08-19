@@ -134,18 +134,7 @@ export const updateConsultation = async (req, res, next) => {
     if (!consultation)
       return next(new Error("Consultation Not Found", { cause: 404 }));
 
-    // 2) مسح الملفات القديمة من Cloudinary لو فيه ملفات
-    if (consultation.attachments && consultation.attachments.length > 0) {
-      for (const file of consultation.attachments) {
-        // public_id بيكون جوه secure_url بعد /upload/
-        const publicId = file.fileUrl.split("/upload/")[1].split(".")[0];
-        await cloudinary.uploader.destroy(`consultations_files/${publicId}`, {
-          resource_type: "auto",
-        });
-      }
-    }
-
-    // 3) رفع الملفات الجديدة لو موجودة
+    // 2) رفع الملفات الجديدة لو موجودة (هنكتب فوق القديمة مباشرة)
     const attachments = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -172,9 +161,11 @@ export const updateConsultation = async (req, res, next) => {
       }
     }
 
-    // 4) تحديث بيانات الاستشارة
+    // 3) تحديث بيانات الاستشارة
     consultation.description = description || consultation.description;
     consultation.type = type || consultation.type;
+
+    // هنا بنكتب فوق الـ attachments القديمة
     if (attachments.length > 0) consultation.attachments = attachments;
 
     await consultation.save();
