@@ -103,3 +103,20 @@ export const PAID = async (req, res, next) => {
     );
   SUCCESS(res, 200, "تم الدفع بنجاح", updatedConsultation);
 };
+
+export const deleteConsultation = async (req, res, next) => {
+  const { consultationId } = req.body;
+  const userId = req.user._id;
+
+  const consultation = await Consultation.findOne({
+    _id: consultationId,
+    patient: userId,
+  });
+  if (!consultation) {
+    return next(new Error("Consultation Not Found", { cause: 404 }));
+  }
+
+  await consultation.deleteOne();
+
+  SUCCESS(res, 200, "Consultation Deleted Successfully", consultation);
+};

@@ -8,4 +8,6 @@ const router = Router();
 router.post("/createConsultation",verifyToken,upload.array("files", 5),PatService.createConsultation);
 router.get("/MyConsultations", verifyToken, PatService.getMyConsultations);
 router.patch("/PAID", verifyToken , PatService.PAID);
+router.delete("/deleteConsultation", verifyToken, PatService.deleteConsultation);
+
 export default router;

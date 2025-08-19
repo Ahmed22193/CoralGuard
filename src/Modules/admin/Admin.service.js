@@ -118,3 +118,4 @@ export const getAllConsultations = async (req, res, next) => {
     next(err);
   }
 };
+
