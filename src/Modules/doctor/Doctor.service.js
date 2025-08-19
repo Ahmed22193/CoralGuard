@@ -22,10 +22,12 @@ export const Doctors = async (req, res, next) => {
 
 export const ConsultationsOrders = async (req, res, next) => {
   const { _id } = req.user;
-  const consultations = await Consultations.find({ doctor: _id }).populate(
-    "patient",
-    "firstName middleName lastName phone"
-  );
+
+  // فلترة الاستشارات بحيث الحالة لا تساوي REJECTED
+  const consultations = await Consultations.find({
+    doctor: _id,
+    status: { $ne: "REJECTED" }, // $ne معناها Not Equal
+  }).populate("patient", "firstName middleName lastName phone");
 
   if (!consultations || consultations.length === 0) {
     return next(new Error("لا توجد استشارات", { cause: 404 }));
