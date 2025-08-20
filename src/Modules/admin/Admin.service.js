@@ -26,12 +26,30 @@ export const doctorsRegistration = async (req, res, next) => {
     return next(new Error("No Doctors Found to accepte", { cause: 404 }));
   SUCCESS(res, 200, "Doctors Registration", doctors);
 };
+
 export const deleteUser = async (req, res, next) => {
-  const { userId } = req.body;
-  const user = await UserModel.findByIdAndDelete(userId);
-  if (!user) return next(new Error("User Not Found", { cause: 404 }));
-  SUCCESS(res, 200, "User Deleted Successfully", user);
+  try {
+    const { userId } = req.body;
+
+    // 1- دور على المستخدم الأول
+    const user = await UserModel.findById(userId);
+    if (!user) return next(new Error("User Not Found", { cause: 404 }));
+
+    // 2- احذف الاستشارات المرتبطة
+    await ConsultationModel.deleteMany({
+      $or: [{ patient: userId }, { doctor: userId }],
+    });
+
+    // 3- احذف المستخدم
+    await UserModel.findByIdAndDelete(userId);
+
+    // 4- رجع الرد
+    SUCCESS(res, 200, "User & Consultations Deleted Successfully", user);
+  } catch (error) {
+    next(error);
+  }
 };
+
 export const deleteConsultation = async (req, res, next) => {
   const { consultationId } = req.body;
   const consultation = await ConsultationModel.findByIdAndDelete(
@@ -41,6 +59,7 @@ export const deleteConsultation = async (req, res, next) => {
     return next(new Error("Consultation Not Found", { cause: 404 }));
   SUCCESS(res, 200, "Consultation Deleted Successfully", consultation);
 };
+
 export const getStats = async (req, res, next) => {
   const doctorsCount = await UserModel.countDocuments({ userType: "DOCTOR" });
   const patientsCount = await UserModel.countDocuments({ userType: "PATIENT" });
@@ -118,4 +137,3 @@ export const getAllConsultations = async (req, res, next) => {
     next(err);
   }
 };
-
