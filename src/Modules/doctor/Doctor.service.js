@@ -122,7 +122,7 @@ export const addReport = async (req, res, next) => {
     }
 
     const updatedConsultation = await Consultations.findOneAndUpdate(
-      { _id: consultationId, doctor, status: "PAID" },
+      { _id: consultationId, status: "PAID" },
       { status: "COMPLETED" },
       { new: true }
     );
