@@ -121,6 +121,19 @@ export const addReport = async (req, res, next) => {
       return res.status(404).json({ error: "الاستشارة غير موجودة" });
     }
 
+    const updatedConsultation = await Consultations.findOneAndUpdate(
+      { _id: consultationId, doctor, status: "PAID" },
+      { status: "COMPLETED" },
+      { new: true }
+    );
+    if (!updatedConsultation) {
+      return next(
+        new Error(" الاستشارة غير موجودة أو لا تخصك او لم يتم الدفع", {
+          cause: 401,
+        })
+      );
+    }
+
     res.status(200).json({
       message: "تم رفع التقرير وربطه بالاستشارة",
       consultation,
