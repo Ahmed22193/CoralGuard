@@ -6,12 +6,9 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "image/jpeg",
     "image/png",
-    "application/pdf",
-    "application/msword", // .doc
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-    "text/plain", // .txt
+    "image/webp",
+    "image/jpg"
   ];
-
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
