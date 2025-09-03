@@ -132,4 +132,52 @@ adminRouter.post("/profile/change-password",
   AdminController.changeAdminPassword
 );
 
+// User Role Management Routes
+adminRouter.post("/users/:userId/change-role", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.changeUserRole
+);
+
+adminRouter.post("/users/bulk-change-roles", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.bulkChangeUserRoles
+);
+
+adminRouter.get("/users/:userId/role-history", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.getUserRoleHistory
+);
+
+adminRouter.get("/users/role-history", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.getAllRoleHistory
+);
+
+adminRouter.get("/users/by-role/:role", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.getUsersByRole
+);
+
+adminRouter.get("/users/role-stats", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['analytics_view']), 
+  AdminController.getUserRoleStats
+);
+
+adminRouter.get("/users/role-templates", 
+  VerifyingAdminToken, 
+  AdminController.getRoleTemplates
+);
+
+adminRouter.put("/users/:userId/subscription", 
+  VerifyingAdminToken, 
+  adminPermissionCheck(['user_management']), 
+  AdminController.updateUserSubscription
+);
+
 export default adminRouter;

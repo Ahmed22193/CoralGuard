@@ -1,8 +1,10 @@
 import Admin from "../../DB/Models/Admin/admin.model.js";
 import AdminActivityLog from "../../DB/Models/Admin/adminActivityLog.model.js";
 import SystemSettings from "../../DB/Models/Admin/systemSettings.model.js";
+import UserRoleHistory from "../../DB/Models/Admin/userRoleHistory.model.js";
 import User from "../../DB/Models/users.model.js";
 import { AdminDTOMapper } from "../../DTOs/Admin/AdminDTOMapper.js";
+import { UserRoleDTOMapper } from "../../DTOs/Admin/UserRoleDTOMapper.js";
 import { hashPassword, verifyPassword } from "../../Utils/hash.utils.js";
 import { generateToken, verifyToken } from "../../Utils/encryption.js";
 
@@ -706,5 +708,380 @@ export class AdminService {
   static async getTopUsers(limit) {
     // Implement top users by activity
     return [];
+  }
+
+  // User Role Management Services
+  static async changeUserRole(roleChangeData, req) {
+    try {
+      const { userId, newRole, permissions, reason, notifyUser } = roleChangeData;
+
+      // Find the user
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Validate role transition
+      const isValidTransition = UserRoleDTOMapper.validateRoleTransition(
+        user.role, 
+        newRole, 
+        req.admin.role
+      );
+      
+      if (!isValidTransition) {
+        throw new Error("Insufficient permissions to change to this role");
+      }
+
+      // Store previous data for history
+      const previousRole = user.role;
+      const previousPermissions = [...user.permissions];
+
+      // Update user role and permissions
+      user.role = newRole;
+      user.permissions = permissions || UserRoleDTOMapper.getDefaultPermissionsForRole(newRole);
+      user.roleChangedBy = req.admin.id;
+      user.roleChangedAt = new Date();
+
+      await user.save();
+
+      // Create role change history
+      await this.createRoleHistory({
+        userId,
+        previousRole,
+        newRole,
+        previousPermissions,
+        newPermissions: user.permissions,
+        reason,
+        changedBy: req.admin.id,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        notificationSent: notifyUser
+      });
+
+      // Log activity
+      await this.logActivity({
+        adminId: req.admin.id,
+        action: 'permission_change',
+        targetType: 'User',
+        targetId: userId,
+        description: `User role changed from ${previousRole} to ${newRole}: ${user.email}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        metadata: { previousRole, newRole, reason },
+        severity: 'medium'
+      });
+
+      // TODO: Send notification to user if notifyUser is true
+      if (notifyUser) {
+        await this.sendRoleChangeNotification(user, previousRole, newRole, reason);
+      }
+
+      return UserRoleDTOMapper.mapUserToRoleDTO(user);
+    } catch (error) {
+      throw new Error(`Failed to change user role: ${error.message}`);
+    }
+  }
+
+  static async bulkChangeUserRoles(bulkChangeData, req) {
+    try {
+      const { userIds, newRole, permissions, reason, notifyUsers } = bulkChangeData;
+      const results = [];
+      const errors = [];
+
+      // Validate role transition permission for admin
+      const canChangeRole = UserRoleDTOMapper.validateRoleTransition(
+        'user', // Use lowest role for validation
+        newRole, 
+        req.admin.role
+      );
+      
+      if (!canChangeRole) {
+        throw new Error("Insufficient permissions to change to this role");
+      }
+
+      for (const userId of userIds) {
+        try {
+          const result = await this.changeUserRole({
+            userId,
+            newRole,
+            permissions,
+            reason: `Bulk update: ${reason}`,
+            notifyUser: notifyUsers
+          }, req);
+          
+          results.push({
+            userId,
+            success: true,
+            user: result
+          });
+        } catch (error) {
+          errors.push({
+            userId,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+
+      // Log bulk operation
+      await this.logActivity({
+        adminId: req.admin.id,
+        action: 'permission_change',
+        targetType: 'User',
+        description: `Bulk role change to ${newRole} for ${userIds.length} users`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        metadata: { newRole, userCount: userIds.length, successCount: results.length, errorCount: errors.length },
+        severity: 'high'
+      });
+
+      return {
+        successful: results,
+        failed: errors,
+        summary: {
+          total: userIds.length,
+          successful: results.length,
+          failed: errors.length
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to bulk change user roles: ${error.message}`);
+    }
+  }
+
+  static async getUserRoleHistory(userId, { page = 1, limit = 10 } = {}) {
+    try {
+      const skip = (page - 1) * limit;
+      
+      const history = await UserRoleHistory.find({ userId })
+        .populate('changedBy', 'name email')
+        .sort({ changedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+      const total = await UserRoleHistory.countDocuments({ userId });
+      const totalPages = Math.ceil(total / limit);
+
+      const historyList = UserRoleDTOMapper.mapRoleHistoryListToDTO(history);
+
+      return {
+        history: historyList,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          total,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to get user role history: ${error.message}`);
+    }
+  }
+
+  static async getAllRoleHistory({ page = 1, limit = 20, filters = {} } = {}) {
+    try {
+      const query = {};
+      
+      if (filters.userId) query.userId = filters.userId;
+      if (filters.newRole) query.newRole = filters.newRole;
+      if (filters.changedBy) query.changedBy = filters.changedBy;
+      if (filters.startDate || filters.endDate) {
+        query.changedAt = {};
+        if (filters.startDate) query.changedAt.$gte = new Date(filters.startDate);
+        if (filters.endDate) query.changedAt.$lte = new Date(filters.endDate);
+      }
+
+      const skip = (page - 1) * limit;
+      
+      const history = await UserRoleHistory.find(query)
+        .populate('userId', 'name email')
+        .populate('changedBy', 'name email')
+        .sort({ changedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+      const total = await UserRoleHistory.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+
+      const historyList = UserRoleDTOMapper.mapRoleHistoryListToDTO(history);
+
+      return {
+        history: historyList,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          total,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to get role history: ${error.message}`);
+    }
+  }
+
+  static async getUsersByRole(role, { page = 1, limit = 10, filters = {} } = {}) {
+    try {
+      const query = { role };
+      
+      if (filters.isActive !== undefined) query.isActive = filters.isActive;
+      if (filters.isVerified !== undefined) query.isVerified = filters.isVerified;
+      if (filters.search) {
+        query.$or = [
+          { name: { $regex: filters.search, $options: 'i' } },
+          { email: { $regex: filters.search, $options: 'i' } },
+          { 'profile.organization': { $regex: filters.search, $options: 'i' } }
+        ];
+      }
+
+      const skip = (page - 1) * limit;
+      
+      const users = await User.find(query)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+      const total = await User.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+
+      const userList = UserRoleDTOMapper.mapUsersToRoleListDTO(users);
+
+      return {
+        users: userList,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          total,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to get users by role: ${error.message}`);
+    }
+  }
+
+  static async getUserRoleStats() {
+    try {
+      // Get user counts by role
+      const usersByRole = await User.aggregate([
+        { $group: { _id: '$role', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]);
+
+      // Get user counts by subscription
+      const usersBySubscription = await User.aggregate([
+        { $group: { _id: '$subscription.plan', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]);
+
+      // Get recent role changes
+      const recentRoleChanges = await UserRoleHistory.find()
+        .populate('userId', 'name email')
+        .populate('changedBy', 'name email')
+        .sort({ changedAt: -1 })
+        .limit(10);
+
+      // Calculate growth stats
+      const today = new Date();
+      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const [totalUsers, activeUsers, newUsersThisWeek, newUsersThisMonth] = await Promise.all([
+        User.countDocuments(),
+        User.countDocuments({ isActive: true }),
+        User.countDocuments({ createdAt: { $gte: lastWeek } }),
+        User.countDocuments({ createdAt: { $gte: lastMonth } })
+      ]);
+
+      const statsData = {
+        totalUsers,
+        activeUsers,
+        usersByRole: Object.fromEntries(usersByRole.map(item => [item._id, item.count])),
+        usersBySubscription: Object.fromEntries(usersBySubscription.map(item => [item._id, item.count])),
+        recentRoleChanges: UserRoleDTOMapper.mapRoleHistoryListToDTO(recentRoleChanges),
+        growthStats: {
+          newUsersThisWeek,
+          newUsersThisMonth,
+          weeklyGrowthRate: totalUsers > 0 ? (newUsersThisWeek / totalUsers * 100).toFixed(2) : 0,
+          monthlyGrowthRate: totalUsers > 0 ? (newUsersThisMonth / totalUsers * 100).toFixed(2) : 0
+        }
+      };
+
+      return UserRoleDTOMapper.mapUserStatsToDTO(statsData);
+    } catch (error) {
+      throw new Error(`Failed to get user role stats: ${error.message}`);
+    }
+  }
+
+  static async getRoleTemplates() {
+    try {
+      return UserRoleDTOMapper.mapRoleTemplatesToDTO();
+    } catch (error) {
+      throw new Error(`Failed to get role templates: ${error.message}`);
+    }
+  }
+
+  static async updateUserSubscription(userId, subscriptionData, req) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const previousSubscription = { ...user.subscription };
+      
+      user.subscription = {
+        ...user.subscription,
+        ...subscriptionData,
+        startDate: subscriptionData.startDate || new Date(),
+        endDate: subscriptionData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default 30 days
+      };
+
+      await user.save();
+
+      // Log activity
+      await this.logActivity({
+        adminId: req.admin.id,
+        action: 'update_user',
+        targetType: 'User',
+        targetId: userId,
+        description: `User subscription updated: ${user.email}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        metadata: { previousSubscription, newSubscription: user.subscription },
+        severity: 'medium'
+      });
+
+      return UserRoleDTOMapper.mapSubscriptionToDTO(user.subscription);
+    } catch (error) {
+      throw new Error(`Failed to update user subscription: ${error.message}`);
+    }
+  }
+
+  // Helper method to create role history
+  static async createRoleHistory(historyData) {
+    try {
+      const history = new UserRoleHistory(historyData);
+      await history.save();
+      return history;
+    } catch (error) {
+      console.error('Failed to create role history:', error.message);
+      // Don't throw error for history creation failures
+    }
+  }
+
+  // Helper method to send role change notification
+  static async sendRoleChangeNotification(user, previousRole, newRole, reason) {
+    try {
+      // TODO: Implement email/notification service
+      console.log(`Sending role change notification to ${user.email}: ${previousRole} -> ${newRole}`);
+      // This would integrate with your email service
+    } catch (error) {
+      console.error('Failed to send role change notification:', error.message);
+      // Don't throw error for notification failures
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { AdminService } from "./Admin.service.js";
 import { AdminDTOMapper } from "../../DTOs/Admin/AdminDTOMapper.js";
+import { UserRoleDTOMapper } from "../../DTOs/Admin/UserRoleDTOMapper.js";
 import { SuccessfulRes } from "../../Utils/SuccessfulRes.js";
 import { globalError } from "../../Utils/gloabelError.js";
 
@@ -293,6 +294,141 @@ export class AdminController {
       await AdminService.changeAdminPassword(req.admin.id, currentPassword, newPassword, req);
       
       const response = SuccessfulRes("Password changed successfully");
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  // User Role Management Controllers
+  static async changeUserRole(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const { newRole, permissions, reason, notifyUser } = req.body;
+      
+      if (!newRole || !reason) {
+        return next(globalError("New role and reason are required", 400));
+      }
+      
+      const roleChangeData = UserRoleDTOMapper.mapRoleChangeRequestToModel({
+        userId,
+        newRole,
+        permissions,
+        reason,
+        notifyUser
+      });
+      
+      const result = await AdminService.changeUserRole(roleChangeData, req);
+      
+      const response = SuccessfulRes("User role changed successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async bulkChangeUserRoles(req, res, next) {
+    try {
+      const { userIds, newRole, permissions, reason, notifyUsers } = req.body;
+      
+      if (!userIds || userIds.length === 0 || !newRole || !reason) {
+        return next(globalError("User IDs, new role, and reason are required", 400));
+      }
+      
+      const bulkChangeData = UserRoleDTOMapper.mapBulkRoleChangeRequestToModel({
+        userIds,
+        newRole,
+        permissions,
+        reason,
+        notifyUsers
+      });
+      
+      const result = await AdminService.bulkChangeUserRoles(bulkChangeData, req);
+      
+      const response = SuccessfulRes("Bulk role change completed", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async getUserRoleHistory(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const { page = 1, limit = 10 } = req.query;
+      
+      const result = await AdminService.getUserRoleHistory(userId, { page, limit });
+      
+      const response = SuccessfulRes("User role history retrieved successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async getAllRoleHistory(req, res, next) {
+    try {
+      const { page = 1, limit = 20, userId, newRole, changedBy, startDate, endDate } = req.query;
+      const filters = { userId, newRole, changedBy, startDate, endDate };
+      
+      const result = await AdminService.getAllRoleHistory({ page, limit, filters });
+      
+      const response = SuccessfulRes("Role history retrieved successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async getUsersByRole(req, res, next) {
+    try {
+      const { role } = req.params;
+      const { page = 1, limit = 10, isActive, isVerified, search } = req.query;
+      const filters = { isActive, isVerified, search };
+      
+      const result = await AdminService.getUsersByRole(role, { page, limit, filters });
+      
+      const response = SuccessfulRes("Users by role retrieved successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async getUserRoleStats(req, res, next) {
+    try {
+      const result = await AdminService.getUserRoleStats();
+      
+      const response = SuccessfulRes("User role statistics retrieved successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async getRoleTemplates(req, res, next) {
+    try {
+      const result = await AdminService.getRoleTemplates();
+      
+      const response = SuccessfulRes("Role templates retrieved successfully", result);
+      res.status(200).json(response);
+    } catch (error) {
+      next(globalError(error.message, 400));
+    }
+  }
+
+  static async updateUserSubscription(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const subscriptionData = req.body;
+      
+      if (!subscriptionData.plan) {
+        return next(globalError("Subscription plan is required", 400));
+      }
+      
+      const result = await AdminService.updateUserSubscription(userId, subscriptionData, req);
+      
+      const response = SuccessfulRes("User subscription updated successfully", result);
       res.status(200).json(response);
     } catch (error) {
       next(globalError(error.message, 400));
