@@ -1,8 +1,12 @@
 
-const SUCCESS = (res,status=200,message="Successfull!",data={})=>{
-    return res.status(status).json({
-        message:message,
-        data:data
-    })
-}
+const SUCCESS = (message = "Successful!", data = {}, statusCode = 200) => {
+    return {
+        success: true,
+        message: message,
+        data: data,
+        statusCode: statusCode
+    };
+};
+
+export { SUCCESS as SuccessfulRes };
 export default SUCCESS;

@@ -3,6 +3,16 @@
  * Provides common validation functions and error handling for all DTOs
  */
 
+// Custom error class for DTO validation errors
+export class DTOValidationError extends Error {
+  constructor(message, field = null) {
+    super(message);
+    this.name = 'DTOValidationError';
+    this.field = field;
+    this.statusCode = 400;
+  }
+}
+
 // Common validation utilities
 export class DTOValidationUtils {
   

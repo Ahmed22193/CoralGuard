@@ -6,3 +6,10 @@ export const gloabelError = (err,req,res,next)=>{
     stack:err.stack
     })
 }
+
+// Create error function for throwing errors
+export const globalError = (message, statusCode = 500) => {
+    const error = new Error(message);
+    error.cause = statusCode;
+    return error;
+};
