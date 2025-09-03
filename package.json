@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --watch --env-file=./src/config/.env index.js",
     "start": "node index.js",
-    "seed:admin": "node --env-file=./src/config/.env src/Utils/adminSeeder.js seed"
+    "seed:admin": "node --env-file=./src/config/.env src/Utils/adminSeeder.js seed",
+    "push:dual": "powershell -ExecutionPolicy Bypass -File dual-push.ps1",
+    "push:both": "powershell -ExecutionPolicy Bypass -File dual-push.ps1"
   },
   "keywords": [],
   "author": "",
