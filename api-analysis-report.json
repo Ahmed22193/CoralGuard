@@ -1,0 +1,557 @@
+{
+  "summary": {
+    "totalEndpoints": 39,
+    "categories": 11,
+    "testCommands": 8,
+    "reportDate": "2025-09-03T17:23:49.509Z"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "category": "Authentication",
+      "description": "User Registration"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "category": "Authentication",
+      "description": "User Login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "category": "Authentication",
+      "description": "Refresh Token"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "category": "Authentication",
+      "description": "User Logout"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/profile",
+      "category": "User Management",
+      "description": "Get User Profile"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/profile",
+      "category": "User Management",
+      "description": "Update User Profile"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/change-password",
+      "category": "User Management",
+      "description": "Change Password"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/account",
+      "category": "User Management",
+      "description": "Delete Account"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/auth/login",
+      "category": "Admin Authentication",
+      "description": "Admin Login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "category": "Admin Management",
+      "description": "Get All Users"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users/search",
+      "category": "Admin Management",
+      "description": "Search Users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/users",
+      "category": "Admin Management",
+      "description": "Create User"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/users/:id",
+      "category": "Admin Management",
+      "description": "Update User"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/users/:id",
+      "category": "Admin Management",
+      "description": "Delete User"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users/stats",
+      "category": "Admin Management",
+      "description": "User Statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/stats",
+      "category": "Dashboard",
+      "description": "Dashboard Statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/recent-activities",
+      "category": "Dashboard",
+      "description": "Recent Activities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/user-growth",
+      "category": "Dashboard",
+      "description": "User Growth Data"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/content-stats",
+      "category": "Dashboard",
+      "description": "Content Statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings",
+      "category": "System Settings",
+      "description": "Get All Settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings",
+      "category": "System Settings",
+      "description": "Update Settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings/:key",
+      "category": "System Settings",
+      "description": "Get Setting by Key"
+    },
+    {
+      "method": "POST",
+      "path": "/api/settings",
+      "category": "System Settings",
+      "description": "Create Setting"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs",
+      "category": "Activity Logs",
+      "description": "Get Activity Logs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/user/:id",
+      "category": "Activity Logs",
+      "description": "Get User Activity Logs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/logs",
+      "category": "Activity Logs",
+      "description": "Create Activity Log"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/user-activity",
+      "category": "Activity Logs",
+      "description": "Get User Activities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/roles",
+      "category": "Role Management",
+      "description": "Get All Roles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/roles/permissions",
+      "category": "Role Management",
+      "description": "Get All Permissions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/roles",
+      "category": "Role Management",
+      "description": "Create Role"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/roles/:id",
+      "category": "Role Management",
+      "description": "Update Role"
+    },
+    {
+      "method": "GET",
+      "path": "/api/moderation/reports",
+      "category": "Content Moderation",
+      "description": "Get Reports"
+    },
+    {
+      "method": "GET",
+      "path": "/api/moderation/queue",
+      "category": "Content Moderation",
+      "description": "Get Moderation Queue"
+    },
+    {
+      "method": "POST",
+      "path": "/api/moderation/action",
+      "category": "Content Moderation",
+      "description": "Take Moderation Action"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload/profile-image",
+      "category": "File Upload",
+      "description": "Upload Profile Image"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload/document",
+      "category": "File Upload",
+      "description": "Upload Document"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "category": "Health Check",
+      "description": "Server Health Check"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health/db",
+      "category": "Health Check",
+      "description": "Database Health Check"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health/system",
+      "category": "Health Check",
+      "description": "System Health Check"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Authentication",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/auth/register",
+          "category": "Authentication",
+          "description": "User Registration"
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "category": "Authentication",
+          "description": "User Login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/refresh",
+          "category": "Authentication",
+          "description": "Refresh Token"
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "category": "Authentication",
+          "description": "User Logout"
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/user/profile",
+          "category": "User Management",
+          "description": "Get User Profile"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/user/profile",
+          "category": "User Management",
+          "description": "Update User Profile"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/user/change-password",
+          "category": "User Management",
+          "description": "Change Password"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/user/account",
+          "category": "User Management",
+          "description": "Delete Account"
+        }
+      ]
+    },
+    {
+      "name": "Admin Authentication",
+      "count": 1,
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/admin/auth/login",
+          "category": "Admin Authentication",
+          "description": "Admin Login"
+        }
+      ]
+    },
+    {
+      "name": "Admin Management",
+      "count": 6,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/admin/users",
+          "category": "Admin Management",
+          "description": "Get All Users"
+        },
+        {
+          "method": "GET",
+          "path": "/api/admin/users/search",
+          "category": "Admin Management",
+          "description": "Search Users"
+        },
+        {
+          "method": "POST",
+          "path": "/api/admin/users",
+          "category": "Admin Management",
+          "description": "Create User"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/admin/users/:id",
+          "category": "Admin Management",
+          "description": "Update User"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/admin/users/:id",
+          "category": "Admin Management",
+          "description": "Delete User"
+        },
+        {
+          "method": "GET",
+          "path": "/api/admin/users/stats",
+          "category": "Admin Management",
+          "description": "User Statistics"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/dashboard/stats",
+          "category": "Dashboard",
+          "description": "Dashboard Statistics"
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/recent-activities",
+          "category": "Dashboard",
+          "description": "Recent Activities"
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/user-growth",
+          "category": "Dashboard",
+          "description": "User Growth Data"
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/content-stats",
+          "category": "Dashboard",
+          "description": "Content Statistics"
+        }
+      ]
+    },
+    {
+      "name": "System Settings",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/settings",
+          "category": "System Settings",
+          "description": "Get All Settings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/settings",
+          "category": "System Settings",
+          "description": "Update Settings"
+        },
+        {
+          "method": "GET",
+          "path": "/api/settings/:key",
+          "category": "System Settings",
+          "description": "Get Setting by Key"
+        },
+        {
+          "method": "POST",
+          "path": "/api/settings",
+          "category": "System Settings",
+          "description": "Create Setting"
+        }
+      ]
+    },
+    {
+      "name": "Activity Logs",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/logs",
+          "category": "Activity Logs",
+          "description": "Get Activity Logs"
+        },
+        {
+          "method": "GET",
+          "path": "/api/logs/user/:id",
+          "category": "Activity Logs",
+          "description": "Get User Activity Logs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/logs",
+          "category": "Activity Logs",
+          "description": "Create Activity Log"
+        },
+        {
+          "method": "GET",
+          "path": "/api/logs/user-activity",
+          "category": "Activity Logs",
+          "description": "Get User Activities"
+        }
+      ]
+    },
+    {
+      "name": "Role Management",
+      "count": 4,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/roles",
+          "category": "Role Management",
+          "description": "Get All Roles"
+        },
+        {
+          "method": "GET",
+          "path": "/api/roles/permissions",
+          "category": "Role Management",
+          "description": "Get All Permissions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/roles",
+          "category": "Role Management",
+          "description": "Create Role"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/roles/:id",
+          "category": "Role Management",
+          "description": "Update Role"
+        }
+      ]
+    },
+    {
+      "name": "Content Moderation",
+      "count": 3,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/moderation/reports",
+          "category": "Content Moderation",
+          "description": "Get Reports"
+        },
+        {
+          "method": "GET",
+          "path": "/api/moderation/queue",
+          "category": "Content Moderation",
+          "description": "Get Moderation Queue"
+        },
+        {
+          "method": "POST",
+          "path": "/api/moderation/action",
+          "category": "Content Moderation",
+          "description": "Take Moderation Action"
+        }
+      ]
+    },
+    {
+      "name": "File Upload",
+      "count": 2,
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/upload/profile-image",
+          "category": "File Upload",
+          "description": "Upload Profile Image"
+        },
+        {
+          "method": "POST",
+          "path": "/api/upload/document",
+          "category": "File Upload",
+          "description": "Upload Document"
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "count": 3,
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/health",
+          "category": "Health Check",
+          "description": "Server Health Check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/health/db",
+          "category": "Health Check",
+          "description": "Database Health Check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/health/system",
+          "category": "Health Check",
+          "description": "System Health Check"
+        }
+      ]
+    }
+  ],
+  "testingInstructions": {
+    "setup": [
+      "1. Ensure server is running on port 3000",
+      "2. Verify database connection is active",
+      "3. Use the provided test commands for manual verification"
+    ],
+    "automatedTesting": [
+      "Run: node api-test-suite-native.js",
+      "Check generated reports for detailed results"
+    ]
+  }
+}

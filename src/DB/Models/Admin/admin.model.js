@@ -11,7 +11,7 @@ const AdminSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true, // Removed to avoid duplicate index warning
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
     },
     password: {
@@ -172,7 +172,7 @@ AdminSchema.methods.incLoginAttempts = function() {
 };
 
 // Indexes for better performance
-AdminSchema.index({ email: 1 });
+AdminSchema.index({ email: 1 }, { unique: true });
 AdminSchema.index({ role: 1 });
 AdminSchema.index({ isActive: 1 });
 AdminSchema.index({ adminLevel: 1 });

@@ -5,7 +5,7 @@ const SystemSettingsSchema = new Schema(
     settingKey: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true, // Removed to avoid duplicate index warning
     },
     settingValue: {
       type: Schema.Types.Mixed,
@@ -39,7 +39,7 @@ const SystemSettingsSchema = new Schema(
 );
 
 // Index for better performance
-SystemSettingsSchema.index({ settingKey: 1 });
+SystemSettingsSchema.index({ settingKey: 1 }, { unique: true });
 SystemSettingsSchema.index({ category: 1 });
 
 export default mongoose.model("SystemSettings", SystemSettingsSchema);
